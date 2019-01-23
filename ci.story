@@ -13,7 +13,7 @@ when http server listen path:'/' method:'POST' as req
     # Check if the event is a new installation
     event = req.headers['X-GitHub-Event']
     if event == 'installation'
-        if req.body['action'] == 'created':
+        if req.body['action'] == 'created'
             redis hset hash:'apps' key:req.body['installation']['account']['id']
                        value:req.body['installation']['id']
             req write content:'Application created acknowledged.'
@@ -44,4 +44,3 @@ when http server listen path:'/' method:'POST' as req
         # TODO add github checks here for the list of line errors
         github status :repo :token :context state:'failure'
                       description:res.reason
-  
