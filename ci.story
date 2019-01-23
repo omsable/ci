@@ -38,9 +38,21 @@ when http server listen path:'/' method:'POST' as req
     # Validate the yaml against the omg microservice
     res = omg validate yaml:omgyml
     if res.valid
+        redis hset hash:'badges' key:repo value:'pass'
         github status :repo :token :context state:'success'
                       description:'microservice.yml is valid.'
     else
+        redis hset hash:'badges' key:repo value:'fail'
         # TODO add github checks here for the list of line errors
         github status :repo :token :context state:'failure'
                       description:res.reason
+
+
+when http server listen path:'/<slug>' method:'GET' as req
+    res = redis hget hash:'badges' key:req.path_params['slug']
+    if res == 'pass'
+        req redirect url:'https://img.shields.io/badge/OMG-valid-brightgreen.svg'
+    else if res == 'fail'
+        req redirect url:'https://img.shields.io/badge/OMG-invalid-red.svg'
+    else
+        req redirect url:'https://img.shields.io/badge/OMG-unknown-lightgrey.svg'
